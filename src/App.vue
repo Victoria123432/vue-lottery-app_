@@ -11,7 +11,7 @@ const mustBeValidDate = helpers.withParams(
   (value: string) =>
     !helpers.req(value) ||
     moment(value) <=
-      moment(new Date(d.getFullYear() - 5, d.getMonth(), d.getDay())),
+      moment(new Date(d.getFullYear() - 14, d.getMonth(), d.getDay())),
 );
 
 interface User {
@@ -64,9 +64,11 @@ function formatPhoneNumber() {
 
 <template>
   <div class="container">
-    <form class="p-3 mb-5 bg-body-tertiary rounded form-style row">
-      <div class="col-10">
-        <input type="text" placeholder="Winners" class="form-control" />
+    <form class="bg-body-tertiary rounded form-style row">
+      <div
+        class="card border-secondary mb-3 light-grey-text col-sm-10 mb-3 mb-sm-0"
+      >
+        <div class="">Winners</div>
       </div>
       <div class="col-auto">
         <button type="submit" class="btn btn-info">New winner</button>
@@ -107,9 +109,15 @@ function formatPhoneNumber() {
               !v$.date.mustBeValidDate.$invalid && !v$.date.required.$invalid,
           }"
         />
-        <span v-if="v$.date.$error" class="text-danger"
-          >This value is required</span
+        <span v-if="v$.date.$error" class="text-danger">
+          This value is required
+        </span>
+        <span
+          v-if="!v$.date.required.$invalid && v$.date.mustBeValidDate.$invalid"
+          class="text-danger"
         >
+          You must reach 14
+        </span>
       </div>
 
       <div class="mb-3">
