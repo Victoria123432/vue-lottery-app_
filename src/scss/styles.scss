@@ -1,0 +1,79 @@
+
+// @import "bootstrap/scss/reboot";   // Базові стилі
+// @import "bootstrap/scss/buttons";  // Кнопки
+// @import "bootstrap/scss/forms";    // Поля форм
+// @import "bootstrap/scss/tables";   // Таблиці
+// @import "bootstrap/scss/grid";     // Сітка (якщо потрібно)
+// @import "bootstrap/scss/utilities"; // Утиліти (якщо потрібні)
+
+// Custom.scss
+// Option B: Include parts of Bootstrap
+
+// 1. Include functions first (so you can manipulate colors, SVGs, calc, etc)
+@import "../node_modules/bootstrap/scss/functions";
+
+// 2. Include any default variable overrides here
+
+// 3. Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
+@import "../node_modules/bootstrap/scss/variables";
+@import "../node_modules/bootstrap/scss/variables-dark";
+
+// 4. Include any default map overrides here
+
+// 5. Include remainder of required parts
+@import "../node_modules/bootstrap/scss/maps";
+@import "../node_modules/bootstrap/scss/mixins";
+@import "../node_modules/bootstrap/scss/root";
+
+// 6. Optionally include any other parts as needed
+@import "../node_modules/bootstrap/scss/utilities";
+@import "../node_modules/bootstrap/scss/reboot";
+@import "../node_modules/bootstrap/scss/type";
+@import "../node_modules/bootstrap/scss/images";
+@import "../node_modules/bootstrap/scss/containers";
+@import "../node_modules/bootstrap/scss/grid";
+@import "../node_modules/bootstrap/scss/helpers";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/forms"; 
+@import "bootstrap/scss/tables";
+
+// 7. Optionally include utilities API last to generate classes based on the Sass map in `_utilities.scss`
+@import "../node_modules/bootstrap/scss/utilities/api";
+
+// 8. Add additional custom code here
+
+
+  .form-style{
+    border-radius: 5px;
+    border: 2px solid rgb(232, 231, 231);
+    margin: 3vw;
+  }
+
+  body {
+    background-color: rgb(244, 244, 244);
+  }  
+
+  $btn-color: white;
+
+  .btn-info {
+    color: $btn-color; 
+    margin-left: 2vw;
+  
+    &:hover,
+    &:active,
+    &:focus {
+    color: $btn-color; 
+  }
+  }
+  .btn-info:active {
+    color: $btn-color !important; 
+  }
+
+  .light-grey-text{
+    color: rgb(168, 168, 168);
+  }
+
+  .right-btn {
+    display: flex;
+    justify-content: flex-end;
+  }
