@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import useVuelidate from "@vuelidate/core";
-import { required, email, minLength } from "@vuelidate/validators";
+import { required, email, minLength, helpers } from "@vuelidate/validators";
+import moment from "moment";
+
+const d = new Date();
+
+const mustBeValidDate = helpers.withParams(
+  { type: "mustBeValidDate" },
+  (value: string) =>
+    !helpers.req(value) ||
+    moment(value) <=
+      moment(new Date(d.getFullYear() - 5, d.getMonth(), d.getDay())),
+);
 
 interface User {
   name: string;
@@ -10,7 +21,7 @@ interface User {
   phone: string;
 }
 
-const newUser = ref<User>({
+const newUser = reactive<User>({
   name: "",
   date: null,
   email: "",
@@ -21,9 +32,12 @@ const users = ref<User[]>([]);
 
 const rules = {
   name: { required, minLength: minLength(2) },
-  date: { required },
+  date: {
+    required,
+    mustBeValidDate,
+  },
   email: { required, email },
-  phone: { required },
+  phone: { required, phv: helpers.regex(/^\(\d{3}\)\s?\d{3}-\d{4}$/) },
 };
 
 const v$ = useVuelidate(rules, newUser);
@@ -31,16 +45,20 @@ const v$ = useVuelidate(rules, newUser);
 function addUser() {
   v$.value.$touch();
   if (!v$.value.$pending && !v$.value.$invalid) {
-    users.value.push({ ...newUser.value });
+    users.value.push({ ...newUser });
 
-    newUser.value = {
-      name: "",
-      date: null,
-      email: "",
-      phone: "",
-    };
+    newUser.name = "";
+    newUser.date = null;
+    newUser.email = "";
+    newUser.phone = "";
     v$.value.$reset();
   }
+}
+
+function formatPhoneNumber() {
+  if (!newUser.phone) return newUser.phone;
+  const phoneNumber = newUser.phone.replace(/[^\d]/g, "");
+  return `(${phoneNumber.slice(0, 3)})${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
 }
 </script>
 
@@ -72,7 +90,9 @@ function addUser() {
               !v$.name.required.$invalid && !v$.name.minLength.$invalid,
           }"
         />
-        <span v-if="v$.name.$error" class="text-danger">Name is required</span>
+        <span v-if="v$.name.$error" class="text-danger"
+          >This value is required</span
+        >
       </div>
 
       <div class="mb-3">
@@ -81,10 +101,14 @@ function addUser() {
           v-model="newUser.date"
           type="date"
           class="form-control"
-          :class="{ 'is-invalid': v$.date.$error }"
+          :class="{
+            'is-invalid': v$.date.$error,
+            'is-valid':
+              !v$.date.mustBeValidDate.$invalid && !v$.date.required.$invalid,
+          }"
         />
-        <span v-if="v$.email.$error" class="text-danger"
-          >Birth day is required</span
+        <span v-if="v$.date.$error" class="text-danger"
+          >This value is required</span
         >
       </div>
 
@@ -95,10 +119,13 @@ function addUser() {
           type="email"
           class="form-control"
           placeholder="Enter email"
-          :class="{ 'is-invalid': v$.email.$error }"
+          :class="{
+            'is-invalid': v$.email.$error,
+            'is-valid': !v$.email.email.$invalid && !v$.email.required.$invalid,
+          }"
         />
         <span v-if="v$.email.$error" class="text-danger"
-          >A valid email is required</span
+          >This value is required</span
         >
       </div>
 
@@ -106,14 +133,17 @@ function addUser() {
         <label class="form-label fs-5 fw-bold">Phone number</label>
         <input
           v-model="newUser.phone"
+          @input="newUser.phone = formatPhoneNumber()"
           type="tel"
-          pattern="\\(\d{3}\\)\\d{3}-\\d{4}"
           class="form-control"
           placeholder="Enter Phone number"
-          :class="{ 'is-invalid': v$.phone.$error }"
+          :class="{
+            'is-invalid': v$.phone.$error,
+            'is-valid': !v$.phone.required.$invalid && !v$.phone.phv.$invalid,
+          }"
         />
-        <span v-if="v$.email.$error" class="text-danger"
-          >Phone number is required</span
+        <span v-if="v$.phone.$error" class="text-danger"
+          >This value is required</span
         >
       </div>
 
@@ -133,7 +163,7 @@ function addUser() {
             <th scope="col">Phone number</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="light-grey-text">
           <tr
             v-for="({ name, date, email, phone }, index) in users"
             :key="index"
