@@ -75,12 +75,9 @@ function deleteWinner(index: number) {
   winners.value.splice(index, 1);
 }
 
-const winnerCount = computed(() => {
-  return winners.value.length;
-});
-const userCount = computed(() => {
-  return users.value.length;
-});
+const isDisabled = computed(
+  () => winners.value.length >= 3 || users.value.length === 0,
+);
 </script>
 
 <template>
@@ -112,7 +109,7 @@ const userCount = computed(() => {
         <button
           @click.prevent="newWinner"
           class="btn btn-info"
-          :disabled="winnerCount > 3 || userCount == 0"
+          :disabled="isDisabled"
         >
           New winner
         </button>
