@@ -29,6 +29,7 @@ const newUser = reactive<User>({
 });
 
 const users = ref<User[]>([]);
+const winner = ref<User | null>(null);
 
 const rules = {
   name: { required, minLength: minLength(2) },
@@ -60,6 +61,13 @@ function formatPhoneNumber() {
   const phoneNumber = newUser.phone.replace(/[^\d]/g, "");
   return `(${phoneNumber.slice(0, 3)})${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
 }
+
+function newWinner() {
+  const num: number = Math.floor(Math.random() * users.value.length);
+  winner.value = users.value[num];
+}
+
+function delateWinner() {}
 </script>
 
 <template>
@@ -68,10 +76,22 @@ function formatPhoneNumber() {
       <div
         class="card border-secondary mb-3 light-grey-text col-sm-10 mb-3 mb-sm-0"
       >
-        <div class="">Winners</div>
+        <div
+          v-if="winner"
+          class="p-3 bg-info text-white rounded winnerCont d-flex justify-content-between align-items-center"
+        >
+          {{ winner.name }}
+          <button class="btn btn-info btn-sm" @click.prevent="delateWinner">
+            x
+          </button>
+        </div>
+
+        <div class="light-grey-text">Winners</div>
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-info">New winner</button>
+        <button @click.prevent="newWinner" class="btn btn-info">
+          New winner
+        </button>
       </div>
     </form>
 
