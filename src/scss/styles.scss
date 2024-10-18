@@ -72,11 +72,4 @@
     display: flex;
     justify-content: flex-end;
   }
-  .winnerCont {
-    width: 200px;
-    height: 35px;
-    padding: 5px;
-    box-sizing: border-box; /* Враховує padding в розміри контейнера */
-    overflow: hidden; /* Приховує будь-які елементи, що виходять за межі */
-    white-space: nowrap; /* Запобігає переносу тексту */
-}
+  

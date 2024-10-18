@@ -29,7 +29,7 @@ const newUser = reactive<User>({
 });
 
 const users = ref<User[]>([]);
-const winner = ref<User | null>(null);
+const winners = ref<User[]>([]);
 
 const rules = {
   name: { required, minLength: minLength(2) },
@@ -63,30 +63,43 @@ function formatPhoneNumber() {
 }
 
 function newWinner() {
-  const num: number = Math.floor(Math.random() * users.value.length);
-  winner.value = users.value[num];
+  let winner;
+  do {
+    const num: number = Math.floor(Math.random() * users.value.length);
+    winner = users.value[num];
+  } while (winners.value.includes(winner));
+  winners.value.push(winner);
 }
 
-function delateWinner() {}
+function deleteWinner(index: number) {
+  winners.value.splice(index, 1);
+}
 </script>
 
 <template>
   <div class="container">
-    <form class="bg-body-tertiary rounded form-style row">
+    <form class="bg-body-tertiary rounded form-style row align-items-center">
       <div
-        class="card border-secondary mb-3 light-grey-text col-sm-10 mb-3 mb-sm-0"
+        class="card border-secondary mb-3 light-grey-text col-sm-10 mb-3 mb-sm-0 d-flex align-items-center"
       >
-        <div
-          v-if="winner"
-          class="p-3 bg-info text-white rounded winnerCont d-flex justify-content-between align-items-center"
-        >
-          {{ winner.name }}
-          <button class="btn btn-info btn-sm" @click.prevent="delateWinner">
-            x
-          </button>
+        <div class="p-3 d-flex align-items-center">
+          <span class="fw-bold me-3">Winners:</span>
+          <div>
+            <span
+              v-for="(winner, index) in winners"
+              :key="index"
+              class="p-2 bg-info text-white rounded me-2"
+            >
+              {{ winner.name }}
+              <button
+                class="btn btn-info btn-sm ms-2"
+                @click.prevent="deleteWinner(index)"
+              >
+                x
+              </button>
+            </span>
+          </div>
         </div>
-
-        <div class="light-grey-text">Winners</div>
       </div>
       <div class="col-auto">
         <button @click.prevent="newWinner" class="btn btn-info">
