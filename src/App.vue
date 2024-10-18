@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, email, minLength, helpers } from "@vuelidate/validators";
 import moment from "moment";
@@ -74,6 +74,13 @@ function newWinner() {
 function deleteWinner(index: number) {
   winners.value.splice(index, 1);
 }
+
+const winnerCount = computed(() => {
+  return winners.value.length;
+});
+const userCount = computed(() => {
+  return users.value.length;
+});
 </script>
 
 <template>
@@ -102,7 +109,11 @@ function deleteWinner(index: number) {
         </div>
       </div>
       <div class="col-auto">
-        <button @click.prevent="newWinner" class="btn btn-info">
+        <button
+          @click.prevent="newWinner"
+          class="btn btn-info"
+          :disabled="winnerCount > 3 || userCount == 0"
+        >
           New winner
         </button>
       </div>
