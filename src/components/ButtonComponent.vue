@@ -4,13 +4,16 @@
 const props = defineProps<{
   label: string;
   disabled: boolean;
-  onClick: () => void;
+}>();
+
+const emit = defineEmits<{
+  (e: "click"): void; // Correctly define the click event
 }>();
 </script>
 
 <template>
   <button
-    @click.prevent="props.onClick"
+    @click="emit('click')"
     :disabled="props.disabled"
     class="btn btn-info"
   >

@@ -1,7 +1,16 @@
 <script setup lang="ts">
+import { User } from "./User.ts";
 const props = defineProps<{
-  winners: [];
+  winners: User[];
 }>();
+
+const emit = defineEmits<{
+  (e: "removeWinner", index: number): void;
+}>();
+
+function deleteWinner(index: number) {
+  emit("removeWinner", index);
+}
 </script>
 
 <template>

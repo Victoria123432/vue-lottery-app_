@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: string;
+  modelValue: string | Date | null;
   label: string;
   type: string;
   error: boolean;
@@ -35,3 +35,6 @@ function updateValue(event: Event) {
     <span v-if="props.error" class="text-danger">{{ props.errorMessage }}</span>
   </div>
 </template>
+<style lang="scss">
+@import "./scss/styles.scss";
+</style>
