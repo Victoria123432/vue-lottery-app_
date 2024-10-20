@@ -1,15 +1,14 @@
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: string | Date | null;
+  modelValue: Date | null | string;
   label: string;
   type: string;
   error: boolean;
-  errorMessage: string;
   placeholder: string;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
+  (e: "update:modelValue", value: string | Date): void;
 }>();
 
 function updateValue(event: Event) {
@@ -29,12 +28,11 @@ function updateValue(event: Event) {
       :placeholder="props.placeholder"
       :class="{
         'is-invalid': props.error,
-        'is-valid': !props.error,
+        'is-valid': !props.error && props.modelValue !== '',
       }"
     />
-    <span v-if="props.error" class="text-danger">{{ props.errorMessage }}</span>
+    <span v-if="props.error && props.modelValue === ''" class="text-danger"
+      >This value is required</span
+    >
   </div>
 </template>
-<style lang="scss">
-@import "./scss/styles.scss";
-</style>

@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { User } from "./User";
 import WinnerComponent from "./WinnerComponent.vue";
+import ButtonComponent from "./ButtonComponent.vue";
 
 const winners = ref<User[]>([]);
 
@@ -10,7 +11,10 @@ const props = defineProps<{
 }>();
 
 const isDisabled = computed(
-  () => winners.value.length >= 3 || props.users.length === 0,
+  () =>
+    winners.value.length >= 3 ||
+    props.users.length === 0 ||
+    winners.value.length === props.users.length,
 );
 
 function newWinner() {
@@ -22,13 +26,19 @@ function newWinner() {
   winners.value.push(winner);
 }
 
-function removeWinner(index: number) {
-  winners.value.splice(index, 1);
+function removeWinner(id: number) {
+  const index = winners.value.findIndex((winner) => winner.id === id);
+  if (index !== -1) {
+    winners.value.splice(index, 1);
+  }
 }
 </script>
 
 <template>
-  <form class="bg-body-tertiary rounded form-style row align-items-center">
+  <form
+    @submit.prevent="newWinner"
+    class="bg-body-tertiary rounded form-style row align-items-center"
+  >
     <div
       class="card border-secondary mb-3 light-grey-text col-sm-10 mb-3 mb-sm-0 d-flex align-items-center"
     >
@@ -40,14 +50,7 @@ function removeWinner(index: number) {
       </div>
     </div>
     <div class="col-auto">
-      <ButtonComponent
-        :disabled="isDisabled"
-        label="New Winner"
-        @click="newWinner"
-      />
+      <ButtonComponent :disabled="isDisabled" label="New Winner" />
     </div>
   </form>
 </template>
-<style lang="scss">
-@import "./scss/styles.scss";
-</style>
