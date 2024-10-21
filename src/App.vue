@@ -27,6 +27,12 @@ const newUser = reactive<User>({
   email: "",
   phone: "",
 });
+const focusedFields = reactive({
+  name: false,
+  date: false,
+  email: false,
+  phone: false,
+});
 
 const users = ref<User[]>([]);
 const winners = ref<User[]>([]);
@@ -58,8 +64,16 @@ function addUser() {
 
 function formatPhoneNumber() {
   if (!newUser.phone) return newUser.phone;
+
   const phoneNumber = newUser.phone.replace(/[^\d]/g, "");
-  return `(${phoneNumber.slice(0, 3)})${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+
+  if (phoneNumber.length <= 3) {
+    newUser.phone = `(${phoneNumber}`;
+  } else if (phoneNumber.length <= 6) {
+    newUser.phone = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+  } else {
+    newUser.phone = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  }
 }
 
 function newWinner() {
@@ -76,7 +90,10 @@ function deleteWinner(index: number) {
 }
 
 const isDisabled = computed(
-  () => winners.value.length >= 3 || users.value.length === 0,
+  () =>
+    winners.value.length >= 3 ||
+    users.value.length === 0 ||
+    winners.value.length === users.value.length,
 );
 </script>
 
@@ -128,13 +145,20 @@ const isDisabled = computed(
           class="form-control"
           placeholder="Enter user name"
           :class="{
-            'is-invalid': v$.name.$error,
+            'is-invalid': v$.name.minLength.$invalid,
             'is-valid':
               !v$.name.required.$invalid && !v$.name.minLength.$invalid,
           }"
+          @focus="focusedFields.name = true"
+          @blur="focusedFields.name = false"
         />
-        <span v-if="v$.name.$error" class="text-danger"
+        <span
+          v-if="v$.name.required.$invalid && focusedFields.name"
+          class="text-danger"
           >This value is required</span
+        >
+        <span v-if="v$.name.minLength.$invalid" class="text-danger"
+          >Name should have at least two letters</span
         >
       </div>
 
@@ -145,12 +169,17 @@ const isDisabled = computed(
           type="date"
           class="form-control"
           :class="{
-            'is-invalid': v$.date.$error,
+            'is-invalid': v$.date.mustBeValidDate.$invalid,
             'is-valid':
-              !v$.date.mustBeValidDate.$invalid && !v$.date.required.$invalid,
+              !v$.date.required.$invalid && !v$.date.mustBeValidDate.$invalid,
           }"
+          @focus="focusedFields.date = true"
+          @blur="focusedFields.date = false"
         />
-        <span v-if="v$.date.$error" class="text-danger">
+        <span
+          v-if="v$.date.required.$invalid && focusedFields.date"
+          class="text-danger"
+        >
           This value is required
         </span>
         <span
@@ -169,12 +198,21 @@ const isDisabled = computed(
           class="form-control"
           placeholder="Enter email"
           :class="{
-            'is-invalid': v$.email.$error,
+            'is-invalid': v$.email.email.$invalid,
             'is-valid': !v$.email.email.$invalid && !v$.email.required.$invalid,
           }"
+          @focus="focusedFields.email = true"
+          @blur="focusedFields.email = false"
         />
-        <span v-if="v$.email.$error" class="text-danger"
+        <span
+          v-if="v$.email.required.$invalid && focusedFields.email"
+          class="text-danger"
           >This value is required</span
+        >
+        <span
+          v-if="!v$.email.required.$invalid && v$.email.email.$invalid"
+          class="text-danger"
+          >Email should have @</span
         >
       </div>
 
@@ -182,17 +220,26 @@ const isDisabled = computed(
         <label class="form-label fs-5 fw-bold">Phone number</label>
         <input
           v-model="newUser.phone"
-          @input="newUser.phone = formatPhoneNumber()"
+          @input="formatPhoneNumber()"
           type="tel"
           class="form-control"
           placeholder="Enter Phone number"
           :class="{
-            'is-invalid': v$.phone.$error,
+            'is-invalid': v$.phone.phv.$invalid,
             'is-valid': !v$.phone.required.$invalid && !v$.phone.phv.$invalid,
           }"
+          @focus="focusedFields.phone = true"
+          @blur="focusedFields.phone = false"
         />
-        <span v-if="v$.phone.$error" class="text-danger"
+        <span
+          v-if="v$.phone.required.$invalid && focusedFields.phone"
+          class="text-danger"
           >This value is required</span
+        >
+        <span
+          v-if="!v$.phone.required.$invalid && v$.phone.phv.$invalid"
+          class="text-danger"
+          >Phone number should have 10 numbers</span
         >
       </div>
 
