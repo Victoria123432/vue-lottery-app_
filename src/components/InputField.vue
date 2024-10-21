@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { ref } from "vue";
+
+const focused = ref(false);
+
 const props = defineProps<{
   modelValue: Date | null | string;
   label: string;
@@ -27,11 +31,17 @@ function updateValue(event: Event) {
       class="form-control"
       :placeholder="props.placeholder"
       :class="{
-        'is-invalid': props.error,
-        'is-valid': !props.error && props.modelValue !== '',
+        'is-invalid':
+          props.error && props.modelValue !== '' && props.modelValue !== null,
+        'is-valid':
+          !props.error && props.modelValue !== '' && props.modelValue !== null,
       }"
+      @focus="focused = true"
+      @blur="focused = false"
     />
-    <span v-if="props.error && props.modelValue === ''" class="text-danger"
+    <span
+      v-if="(props.modelValue === '' || props.modelValue === null) && focused"
+      class="text-danger"
       >This value is required</span
     >
   </div>

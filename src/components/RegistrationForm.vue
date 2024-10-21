@@ -42,7 +42,6 @@ const rules = {
 const v$ = useVuelidate(rules, newUser);
 
 function addUser() {
-  v$.value.$touch();
   if (!v$.value.$pending && !v$.value.$invalid) {
     emit("user-added", { ...newUser });
 
@@ -50,14 +49,23 @@ function addUser() {
     newUser.date = null;
     newUser.email = "";
     newUser.phone = "";
+
+    v$.value.$reset();
   }
-  v$.value.$reset();
 }
 
 function formatPhoneNumber() {
   if (!newUser.phone) return newUser.phone;
+
   const phoneNumber = newUser.phone.replace(/[^\d]/g, "");
-  return `(${phoneNumber.slice(0, 3)})${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+
+  if (phoneNumber.length <= 3) {
+    newUser.phone = `(${phoneNumber}`;
+  } else if (phoneNumber.length <= 6) {
+    newUser.phone = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+  } else {
+    newUser.phone = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  }
 }
 
 watch(newUser, () => {
@@ -79,11 +87,12 @@ watch(newUser, () => {
       type="text"
       :error="v$.name.$error"
       placeholder="Enter user name"
-      :class="{
-        'is-invalid': v$.name.$error,
-        'is-valid': !v$.name.required.$invalid && !v$.name.minLength.$invalid,
-      }"
     />
+    <span
+      v-if="!v$.name.required.$invalid && v$.name.minLength.$invalid"
+      class="text-danger"
+      >Name should have at least two letters</span
+    >
 
     <InputField
       v-model="newUser.date"
@@ -91,11 +100,6 @@ watch(newUser, () => {
       type="date"
       :error="v$.date.$error"
       placeholder="Select date"
-      :class="{
-        'is-invalid': v$.date.$error,
-        'is-valid':
-          !v$.date.mustBeValidDate.$invalid && !v$.date.required.$invalid,
-      }"
     />
     <span
       v-if="!v$.date.required.$invalid && v$.date.mustBeValidDate.$invalid"
@@ -110,24 +114,26 @@ watch(newUser, () => {
       type="email"
       :error="v$.email.$error"
       placeholder="Enter email"
-      :class="{
-        'is-invalid': v$.email.$error,
-        'is-valid': !v$.email.email.$invalid && !v$.email.required.$invalid,
-      }"
     />
+    <span
+      v-if="!v$.email.required.$invalid && v$.email.$error"
+      class="text-danger"
+      >Email should have @</span
+    >
 
     <InputField
       v-model="newUser.phone"
-      @input="newUser.phone = formatPhoneNumber()"
+      @input="formatPhoneNumber"
       label="Phone number"
       type="tel"
       :error="v$.phone.$error"
       placeholder="Enter Phone number"
-      :class="{
-        'is-invalid': v$.phone.$error,
-        'is-valid': !v$.phone.required.$invalid && !v$.phone.phv.$invalid,
-      }"
     />
+    <span
+      v-if="!v$.phone.required.$invalid && v$.phone.phv.$invalid"
+      class="text-danger"
+      >Phone number should have 10 numbers</span
+    >
 
     <div class="right-btn">
       <ButtonComponent label="Save" :disabled="false" @click="addUser" />
