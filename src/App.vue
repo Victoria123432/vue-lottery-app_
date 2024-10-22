@@ -173,8 +173,8 @@ const isDisabled = computed(
             'is-valid':
               !v$.date.required.$invalid && !v$.date.mustBeValidDate.$invalid,
           }"
-          @focus="focusedFields.date = true"
-          @blur="focusedFields.date = false"
+          @focus="!!focusedFields.date"
+          @blur="!focusedFields.date"
         />
         <span
           v-if="v$.date.required.$invalid && focusedFields.date"
