@@ -36,8 +36,8 @@ function updateValue(event: Event) {
         'is-valid':
           !props.error && props.modelValue !== '' && props.modelValue !== null,
       }"
-      @focus="focused = true"
-      @blur="focused = false"
+      @focus="!!focused"
+      @blur="!focused"
     />
     <span
       v-if="(props.modelValue === '' || props.modelValue === null) && focused"
