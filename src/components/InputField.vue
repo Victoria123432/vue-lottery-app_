@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-const focused = ref();
+const focused = ref(false);
 
 const props = defineProps<{
   modelValue: Date | null | string;
@@ -36,8 +36,8 @@ function updateValue(event: Event) {
         'is-valid':
           !props.error && props.modelValue !== '' && props.modelValue !== null,
       }"
-      @focus="focused"
-      @blur="!focused"
+      @focus="focused = !focused"
+      @blur="focused = !focused"
     />
     <span
       v-if="(props.modelValue === '' || props.modelValue === null) && focused"
