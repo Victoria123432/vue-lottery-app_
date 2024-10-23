@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { User } from "./components/User";
 import ParticipantsTable from "./components/ParticipantsTable.vue";
 import RegistrationForm from "./components/RegistrationForm.vue";
@@ -15,6 +15,18 @@ function addUser(user: User) {
   user.id = maxId + 1;
   users.value.push(user);
 }
+watch(
+  users,
+  (newVal) => {
+    localStorage.setItem("users", JSON.stringify(newVal));
+  },
+  { deep: true },
+);
+
+onMounted(() => {
+  const storedUsers = localStorage.getItem("users");
+  users.value = storedUsers ? JSON.parse(storedUsers) : [];
+});
 </script>
 
 <template>

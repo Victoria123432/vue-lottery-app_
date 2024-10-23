@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { User } from "./User";
 import WinnerComponent from "./WinnerComponent.vue";
 import ButtonComponent from "./ButtonComponent.vue";
@@ -32,6 +32,19 @@ function removeWinner(id: number) {
     winners.value.splice(index, 1);
   }
 }
+
+watch(
+  winners,
+  (newVal) => {
+    localStorage.setItem("winners", JSON.stringify(newVal));
+  },
+  { deep: true },
+);
+
+onMounted(() => {
+  const storedUsers = localStorage.getItem("winners");
+  winners.value = storedUsers ? JSON.parse(storedUsers) : [];
+});
 </script>
 
 <template>

@@ -77,6 +77,7 @@ watch(newUser, () => {
   <form
     @submit.prevent="addUser"
     class="p-3 mb-5 bg-body-tertiary rounded form-style"
+    @keyup.enter="addUser"
   >
     <p class="text-capitalize fs-3 fw-bold">Register form</p>
     <p class="fs-5 light-grey-text">Please fill in all the fields.</p>
