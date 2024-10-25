@@ -1,22 +1,32 @@
 <script setup lang="ts">
 import { User } from "./User";
-import { ref, computed } from "vue";
+import { ref, nextTick } from "vue";
 import ButtonComponent from "./ButtonComponent.vue";
 import RegistrationForm from "./RegistrationForm.vue";
 import { Modal } from "bootstrap";
 import ModalComponent from "./ModalComponent.vue";
+
 const props = defineProps<{
   users: User[];
 }>();
 
-const localUsers = computed(() => props.users);
-
 const selectedUser = ref<User | null>(null);
 
-const openEditModal = (user: User) => {
+const openEditModal = async (user: User) => {
   selectedUser.value = { ...user };
-  const modalElement = document.getElementById("exampleModal") as HTMLElement;
-  console.log(modalElement);
+  await nextTick();
+  const modalElement = document.getElementById("editModal") as HTMLElement;
+  if (modalElement) {
+    const modal = new Modal(modalElement);
+    modal.show();
+  } else {
+    console.error("Modal element not found");
+  }
+};
+const OpenDeleteModal = async (user: User) => {
+  selectedUser.value = { ...user };
+  await nextTick();
+  const modalElement = document.getElementById("deleteModal") as HTMLElement;
   if (modalElement) {
     const modal = new Modal(modalElement);
     modal.show();
@@ -26,20 +36,33 @@ const openEditModal = (user: User) => {
 };
 
 const emit = defineEmits<{
-  (e: "update-users", users: User[]): void;
+  (e: "update-users", users: User): void;
+  (e: "delete-user", id: number): void;
 }>();
 
-function handleSaveChanges(updatedUser: User) {
-  const index = props.users.findIndex((user) => user.id === updatedUser.id);
-  if (index !== -1) {
-    localUsers.value[index] = { ...updatedUser };
+function closeModal(newUserData: User) {
+  selectedUser.value = newUserData;
+  if (selectedUser.value) {
+    selectedUser.value = null;
 
-    emit("update-users", localUsers.value);
-
-    const modalElement = document.getElementById("exampleModal") as HTMLElement;
+    const modalElement = document.getElementById("editModal") as HTMLElement;
     const modal = Modal.getInstance(modalElement);
     modal?.hide();
   }
+}
+
+function saveChanges(newUserData: User) {
+  selectedUser.value = newUserData;
+  if (selectedUser.value) {
+    emit("update-users", selectedUser.value);
+    closeModal(selectedUser.value);
+  }
+}
+function deleteUser(id: number) {
+  emit("delete-user", id);
+  const modalElement = document.getElementById("deleteModal") as HTMLElement;
+  const modal = Modal.getInstance(modalElement);
+  modal?.hide();
 }
 </script>
 
@@ -57,7 +80,7 @@ function handleSaveChanges(updatedUser: User) {
         </tr>
       </thead>
       <tbody class="light-grey-text">
-        <tr v-for="(user, index) in localUsers" :key="index">
+        <tr v-for="(user, index) in props.users" :key="index">
           <th scope="row">{{ index + 1 }}</th>
           <td>{{ user.name }}</td>
           <td>{{ user.date }}</td>
@@ -73,6 +96,7 @@ function handleSaveChanges(updatedUser: User) {
               label="Delate"
               :disabled="false"
               class="btn btn-danger"
+              @click="OpenDeleteModal(user)"
             />
           </td>
         </tr>
@@ -80,17 +104,59 @@ function handleSaveChanges(updatedUser: User) {
     </table>
   </form>
 
-  <ModalComponent v-if="selectedUser" id="exampleModal">
-    <template v-slot:header> Editing {{ selectedUser?.name }} </template>
+  <ModalComponent
+    v-if="selectedUser"
+    id="editModal"
+    @keyup.esc="closeModal(selectedUser)"
+  >
+    <template v-slot:title> Editing {{ selectedUser?.name }} </template>
+    <template v-slot:close-button>
+      <button
+        type="button"
+        class="btn-close"
+        @click="closeModal(selectedUser)"
+        aria-label="Close"
+      ></button>
+    </template>
     <template v-slot:body>
-      <RegistrationForm @new-user="handleSaveChanges" />
+      <RegistrationForm :user="selectedUser" @new-user="saveChanges">
+        <template v-slot:footer="{ submitForm }">
+          <div class="right-btn">
+            <ButtonComponent
+              label="Save changes"
+              :disabled="false"
+              @click="submitForm"
+            />
+          </div>
+        </template>
+      </RegistrationForm>
+    </template>
+  </ModalComponent>
+  <ModalComponent v-if="selectedUser" id="deleteModal">
+    <template v-slot:title> Delating {{ selectedUser?.name }} </template>
+    <template v-slot:close-button>
+      <button
+        type="button"
+        class="btn-close"
+        @click="closeModal(selectedUser)"
+        aria-label="Close"
+      ></button>
+    </template>
+    <template v-slot:body>
+      Are you shure you want to delate {{ selectedUser?.name }},
+      {{ selectedUser?.email }}
     </template>
     <template v-slot:footer>
-      <ButtonComponent
-        label="Save changes"
-        :disabled="false"
-        @click="handleSaveChanges(selectedUser)"
-      ></ButtonComponent>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        Close
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger"
+        @click="deleteUser(selectedUser.id)"
+      >
+        Delete
+      </button>
     </template>
   </ModalComponent>
 </template>

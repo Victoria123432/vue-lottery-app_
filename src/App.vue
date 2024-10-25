@@ -16,26 +16,21 @@ function addUser(user: User) {
   user.id = maxId + 1;
   users.value.push(user);
 }
-// const newUser: User;
 
-// function addUser() {
-//   if (!v$.value.$pending && !v$.value.$invalid) {
-//     const maxId = users.value.reduce(
-//       (max, current) => (current.id > max ? current.id : max),
-//       0,
-//     );
+function updateUsers(updatedUser: User) {
+  const index = users.value.findIndex((user) => user.id === updatedUser.id);
+  if (index !== -1) {
+    users.value[index] = { ...updatedUser };
+  }
+}
 
-//     newUser.id = maxId + 1;
-//     users.value.push(newUser);
+function deleteUser(id: number) {
+  const index = users.value.findIndex((user) => user.id === id);
+  if (index !== -1) {
+    users.value.splice(index, 1);
+  }
+}
 
-//     newUser.name = "";
-//     newUser.date = null;
-//     newUser.email = "";
-//     newUser.phone = "";
-
-//     v$.value.$reset();
-//   }
-// }
 watch(
   users,
   (newVal) => {
@@ -48,10 +43,6 @@ onMounted(() => {
   const storedUsers = localStorage.getItem("users");
   users.value = storedUsers ? JSON.parse(storedUsers) : [];
 });
-
-// function updateUsers(updatedUsers: User[]) {
-//   users.value = [...updatedUsers];
-// }
 </script>
 
 <template>
@@ -62,13 +53,17 @@ onMounted(() => {
       <p class="text-capitalize fs-3 fw-bold">Register form</p>
       <p class="fs-5 light-grey-text">Please fill in all the fields.</p>
     </template>
-    <template v-slot:footer>
+    <template v-slot:footer="{ submitForm }">
       <div class="right-btn">
-        <ButtonComponent label="Save" :disabled="false" />
+        <ButtonComponent label="Save" :disabled="false" @click="submitForm" />
       </div>
     </template>
   </RegistrationForm>
-  <ParticipantsTable :users="users" />
+  <ParticipantsTable
+    :users="users"
+    @update-users="updateUsers"
+    @delete-user="deleteUser"
+  />
 </template>
 
 <style lang="scss">

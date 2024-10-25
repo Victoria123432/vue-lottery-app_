@@ -8,6 +8,8 @@ import moment from "moment";
 
 const d = new Date();
 
+const props = defineProps<{ user?: User }>();
+
 const mustBeValidDate = helpers.withParams(
   { type: "mustBeValidDate" },
   (value: string) =>
@@ -16,16 +18,12 @@ const mustBeValidDate = helpers.withParams(
       moment(new Date(d.getFullYear() - 14, d.getMonth(), d.getDay())),
 );
 
-// const emit = defineEmits<{
-//   (e: "user-added", user: User): void;
-// }>();
-
 const newUser = reactive<User>({
-  id: 0,
-  name: "",
-  date: null,
-  email: "",
-  phone: "",
+  id: props.user?.id || 0,
+  name: props.user?.name || "",
+  date: props.user?.date || null,
+  email: props.user?.email || "",
+  phone: props.user?.phone || "",
 });
 
 const emit = defineEmits<{
@@ -43,19 +41,6 @@ const rules = {
 };
 
 const v$ = useVuelidate(rules, newUser);
-
-// function addUser() {
-//   if (!v$.value.$pending && !v$.value.$invalid) {
-//     emit("user-added", { ...newUser });
-
-//     newUser.name = "";
-//     newUser.date = null;
-//     newUser.email = "";
-//     newUser.phone = "";
-
-//     v$.value.$reset();
-//   }
-// }
 
 function formatPhoneNumber() {
   if (!newUser.phone) return newUser.phone;
@@ -87,6 +72,22 @@ function submitForm() {
 watch(newUser, () => {
   v$.value.$touch();
 });
+
+watch(
+  () => props.user,
+  (newUser) => {
+    if (newUser) {
+      Object.assign(newUser, {
+        id: newUser.id,
+        name: newUser.name,
+        date: newUser.date,
+        email: newUser.email,
+        phone: newUser.phone,
+      });
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -150,6 +151,6 @@ watch(newUser, () => {
       class="text-danger"
       >Phone number should have 10 numbers</span
     >
-    <slot name="footer"></slot>
+    <slot name="footer" :submitForm="submitForm"></slot>
   </form>
 </template>

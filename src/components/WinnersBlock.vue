@@ -48,10 +48,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <form
-    @submit.prevent="newWinner"
-    class="bg-body-tertiary rounded form-style row align-items-center"
-  >
+  <form class="bg-body-tertiary rounded form-style row align-items-center">
     <div
       class="card border-secondary mb-3 light-grey-text col-sm-10 mb-3 mb-sm-0 d-flex align-items-center"
     >
@@ -63,7 +60,11 @@ onMounted(() => {
       </div>
     </div>
     <div class="col-auto">
-      <ButtonComponent :disabled="isDisabled" label="New Winner" />
+      <ButtonComponent
+        :disabled="isDisabled"
+        label="New Winner"
+        @click="newWinner"
+      />
     </div>
   </form>
 </template>
