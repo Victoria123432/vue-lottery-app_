@@ -5,6 +5,7 @@ import ParticipantsTable from "./components/ParticipantsTable.vue";
 import RegistrationForm from "./components/RegistrationForm.vue";
 import WinnersBlock from "./components/WinnersBlock.vue";
 import ButtonComponent from "./components/ButtonComponent.vue";
+import SearchBar from "./components/SearchBar.vue";
 
 const users = ref<User[]>([]);
 
@@ -59,6 +60,7 @@ onMounted(() => {
       </div>
     </template>
   </RegistrationForm>
+  <SearchBar></SearchBar>
   <ParticipantsTable
     :users="users"
     @update-users="updateUsers"
