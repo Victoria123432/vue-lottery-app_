@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { User } from "./components/User";
 import ParticipantsTable from "./components/ParticipantsTable.vue";
 import RegistrationForm from "./components/RegistrationForm.vue";
@@ -8,6 +8,7 @@ import ButtonComponent from "./components/ButtonComponent.vue";
 import SearchBar from "./components/SearchBar.vue";
 
 const users = ref<User[]>([]);
+const searchUser = ref("");
 
 function addUser(user: User) {
   const maxId = users.value.reduce(
@@ -31,6 +32,15 @@ function deleteUser(id: number) {
     users.value.splice(index, 1);
   }
 }
+
+const filteredUsers = computed(() => {
+  if (!searchUser.value) return users.value;
+  return users.value.filter((user) =>
+    user.name
+      .toLocaleLowerCase()
+      .includes(searchUser.value.toLocaleLowerCase()),
+  );
+});
 
 watch(
   users,
@@ -60,9 +70,9 @@ onMounted(() => {
       </div>
     </template>
   </RegistrationForm>
-  <SearchBar></SearchBar>
+  <SearchBar @filter-by-name="searchUser = $event"></SearchBar>
   <ParticipantsTable
-    :users="users"
+    :users="filteredUsers"
     @update-users="updateUsers"
     @delete-user="deleteUser"
   />

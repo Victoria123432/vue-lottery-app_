@@ -150,7 +150,7 @@ function sortByDate(users: User[]) {
               @click="openEditModal(user)"
             />
             <ButtonComponent
-              label="Delate"
+              label="Delete"
               :disabled="false"
               class="btn btn-danger"
               @click="OpenDeleteModal(user)"

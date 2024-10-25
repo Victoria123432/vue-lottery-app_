@@ -1,4 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const emit = defineEmits<{
+  (e: "filter-by-name", value: string): void;
+}>();
+function updateValue(event: Event) {
+  const target = event.target as HTMLInputElement;
+  emit("filter-by-name", target.value);
+}
+</script>
 
 <template>
   <link
@@ -10,6 +18,7 @@
       <div class="col-md-6">
         <div class="search-container">
           <input
+            @input="updateValue"
             type="text"
             class="form-control search-input"
             placeholder="Search..."
