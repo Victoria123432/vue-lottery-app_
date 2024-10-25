@@ -3,7 +3,6 @@ import { reactive, watch } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, email, minLength, helpers } from "@vuelidate/validators";
 import InputField from "./InputField.vue";
-import ButtonComponent from "./ButtonComponent.vue";
 import { User } from "./User";
 import moment from "moment";
 
@@ -17,9 +16,9 @@ const mustBeValidDate = helpers.withParams(
       moment(new Date(d.getFullYear() - 14, d.getMonth(), d.getDay())),
 );
 
-const emit = defineEmits<{
-  (e: "user-added", user: User): void;
-}>();
+// const emit = defineEmits<{
+//   (e: "user-added", user: User): void;
+// }>();
 
 const newUser = reactive<User>({
   id: 0,
@@ -28,6 +27,10 @@ const newUser = reactive<User>({
   email: "",
   phone: "",
 });
+
+const emit = defineEmits<{
+  (e: "new-user", user: User): void;
+}>();
 
 const rules = {
   name: { required, minLength: minLength(2) },
@@ -41,18 +44,18 @@ const rules = {
 
 const v$ = useVuelidate(rules, newUser);
 
-function addUser() {
-  if (!v$.value.$pending && !v$.value.$invalid) {
-    emit("user-added", { ...newUser });
+// function addUser() {
+//   if (!v$.value.$pending && !v$.value.$invalid) {
+//     emit("user-added", { ...newUser });
 
-    newUser.name = "";
-    newUser.date = null;
-    newUser.email = "";
-    newUser.phone = "";
+//     newUser.name = "";
+//     newUser.date = null;
+//     newUser.email = "";
+//     newUser.phone = "";
 
-    v$.value.$reset();
-  }
-}
+//     v$.value.$reset();
+//   }
+// }
 
 function formatPhoneNumber() {
   if (!newUser.phone) return newUser.phone;
@@ -68,6 +71,19 @@ function formatPhoneNumber() {
   }
 }
 
+function submitForm() {
+  if (!v$.value.$pending && !v$.value.$invalid) {
+    emit("new-user", { ...newUser });
+
+    newUser.name = "";
+    newUser.date = null;
+    newUser.email = "";
+    newUser.phone = "";
+
+    v$.value.$reset();
+  }
+}
+
 watch(newUser, () => {
   v$.value.$touch();
 });
@@ -75,12 +91,11 @@ watch(newUser, () => {
 
 <template>
   <form
-    @submit.prevent="addUser"
     class="p-3 mb-5 bg-body-tertiary rounded form-style"
-    @keyup.enter="addUser"
+    @submit.prevent="submitForm"
+    @keyup.enter="submitForm"
   >
-    <p class="text-capitalize fs-3 fw-bold">Register form</p>
-    <p class="fs-5 light-grey-text">Please fill in all the fields.</p>
+    <slot name="header"></slot>
 
     <InputField
       v-model="newUser.name"
@@ -135,9 +150,6 @@ watch(newUser, () => {
       class="text-danger"
       >Phone number should have 10 numbers</span
     >
-
-    <div class="right-btn">
-      <ButtonComponent label="Save" :disabled="false" @click="addUser" />
-    </div>
+    <slot name="footer"></slot>
   </form>
 </template>

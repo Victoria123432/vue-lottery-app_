@@ -5,7 +5,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "click"): void;
+  (e: "click"): void; // Allow optional parameter
 }>();
 </script>
 
@@ -14,6 +14,7 @@ const emit = defineEmits<{
     @click="emit('click')"
     :disabled="props.disabled"
     class="btn btn-info"
+    type="button"
   >
     {{ props.label }}
   </button>
