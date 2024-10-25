@@ -5,10 +5,15 @@ import { required, email, minLength, helpers } from "@vuelidate/validators";
 import InputField from "./InputField.vue";
 import { User } from "./User";
 import moment from "moment";
+import ModalComponent from "./ModalComponent.vue";
+import { Modal } from "bootstrap";
 
 const d = new Date();
 
-const props = defineProps<{ user?: User }>();
+const props = defineProps<{
+  users?: User[];
+  user?: User;
+}>();
 
 const mustBeValidDate = helpers.withParams(
   { type: "mustBeValidDate" },
@@ -56,8 +61,26 @@ function formatPhoneNumber() {
   }
 }
 
+function initializeModal() {
+  const modalElement = document.getElementById("errorModal") as HTMLElement;
+  if (modalElement) {
+    const errorModal = new Modal(modalElement);
+    errorModal.show();
+  } else {
+    console.error("Error modal element not found");
+  }
+}
+
+function emailExists(email: string) {
+  return props.users ? props.users.some((user) => user.email === email) : false;
+}
+
 function submitForm() {
   if (!v$.value.$pending && !v$.value.$invalid) {
+    if (emailExists(newUser.email)) {
+      initializeModal();
+      return;
+    }
     emit("new-user", { ...newUser });
 
     newUser.name = "";
@@ -153,4 +176,23 @@ watch(
     >
     <slot name="footer" :submitForm="submitForm"></slot>
   </form>
+  <teleport to="body">
+    <ModalComponent id="errorModal">
+      <template v-slot:title> Error </template>
+      <template v-slot:close-button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </template>
+      <template v-slot:body> User with this email already exists </template>
+      <template v-slot:footer>
+        <button type="button" class="btn btn-info" data-bs-dismiss="modal">
+          Ok
+        </button>
+      </template>
+    </ModalComponent>
+  </teleport>
 </template>

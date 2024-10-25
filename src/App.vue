@@ -59,7 +59,7 @@ onMounted(() => {
 <template>
   <div class="container"></div>
   <WinnersBlock :users="users" />
-  <RegistrationForm @new-user="addUser">
+  <RegistrationForm :users="users" @new-user="addUser">
     <template v-slot:header>
       <p class="text-capitalize fs-3 fw-bold">Register form</p>
       <p class="fs-5 light-grey-text">Please fill in all the fields.</p>

@@ -176,7 +176,11 @@ function sortByDate(users: User[]) {
       ></button>
     </template>
     <template v-slot:body>
-      <RegistrationForm :user="selectedUser" @new-user="saveChanges">
+      <RegistrationForm
+        :user="selectedUser"
+        :users="users"
+        @new-user="saveChanges"
+      >
         <template v-slot:footer="{ submitForm }">
           <div class="right-btn">
             <ButtonComponent
