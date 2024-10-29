@@ -151,11 +151,6 @@ function sortByDate(users: User[]) {
     <template v-slot:title> Editing {{ selectedUser?.name }} </template>
 
     <template v-slot:body>
-      <!-- <RegistrationForm
-        :user="selectedUser"
-        :users="props.users"
-        @new-user="saveChanges"
-      /> -->
       <RegistrationForm
         :user="selectedUser"
         :users="props.users"
@@ -192,7 +187,7 @@ function sortByDate(users: User[]) {
     </template>
 
     <template v-slot:actions="{ close, confirm }">
-      <button @click="close" class="btn btn-secondary">Close</button>
+      <button @click="close" class="btn btn-secondary me-2">Close</button>
       <button @click="confirm" class="btn btn-danger">Delete</button>
     </template>
   </ModalComponent>
