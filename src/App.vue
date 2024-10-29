@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from "vue";
-import { User } from "./components/User";
+import { User } from "./types/User";
 import ParticipantsTable from "./components/ParticipantsTable.vue";
 import RegistrationForm from "./components/RegistrationForm.vue";
 import WinnersBlock from "./components/WinnersBlock.vue";

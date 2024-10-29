@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { User } from "./User";
+import { User } from "../types/User";
 import WinnerComponent from "./WinnerComponent.vue";
 import ButtonComponent from "./ButtonComponent.vue";
 

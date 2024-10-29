@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { reactive, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, email, minLength, helpers } from "@vuelidate/validators";
 import InputField from "./InputField.vue";
-import { User } from "./User";
+import { User } from "../types/User";
 import moment from "moment";
 import ModalComponent from "./ModalComponent.vue";
-import { Modal } from "bootstrap";
+
+const isModalOpen = ref(false);
+
+const modalConfirmed = () => {
+  isModalOpen.value = false;
+};
 
 const d = new Date();
 
@@ -61,16 +66,6 @@ function formatPhoneNumber() {
   }
 }
 
-function initializeModal() {
-  const modalElement = document.getElementById("errorModal") as HTMLElement;
-  if (modalElement) {
-    const errorModal = new Modal(modalElement);
-    errorModal.show();
-  } else {
-    console.error("Error modal element not found");
-  }
-}
-
 function emailExists(email: string) {
   return props.users ? props.users.some((user) => user.email === email) : false;
 }
@@ -78,7 +73,7 @@ function emailExists(email: string) {
 function submitForm() {
   if (!v$.value.$pending && !v$.value.$invalid) {
     if (emailExists(newUser.email)) {
-      initializeModal();
+      isModalOpen.value = true;
       return;
     }
     emit("new-user", { ...newUser });
@@ -177,21 +172,18 @@ watch(
     <slot name="footer" :submitForm="submitForm"></slot>
   </form>
   <teleport to="body">
-    <ModalComponent id="errorModal">
+    <ModalComponent
+      :isOpen="isModalOpen"
+      @close="isModalOpen = false"
+      @ok="modalConfirmed"
+      id="errorModal"
+    >
       <template v-slot:title> Error </template>
-      <template v-slot:close-button>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </template>
+
       <template v-slot:body> User with this email already exists </template>
-      <template v-slot:footer>
-        <button type="button" class="btn btn-info" data-bs-dismiss="modal">
-          Ok
-        </button>
+
+      <template v-slot:actions="{ close }">
+        <button @click="close" class="btn btn-info">Ok</button>
       </template>
     </ModalComponent>
   </teleport>

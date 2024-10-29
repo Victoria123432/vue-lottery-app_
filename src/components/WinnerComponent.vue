@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { User } from "./User.ts";
+import { User } from "../types/User.ts";
 const props = defineProps<{
   winners: User[];
 }>();

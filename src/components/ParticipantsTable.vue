@@ -1,38 +1,26 @@
 <script setup lang="ts">
-import { User } from "./User";
-import { ref, nextTick } from "vue";
+import { User } from "../types/User";
+import { ref } from "vue";
 import ButtonComponent from "./ButtonComponent.vue";
 import RegistrationForm from "./RegistrationForm.vue";
-import { Modal } from "bootstrap";
 import ModalComponent from "./ModalComponent.vue";
 
 const props = defineProps<{
   users: User[];
 }>();
 
+const isEditModalOpen = ref(false);
+const isDeleteModalOpen = ref(false);
+
 const selectedUser = ref<User | null>(null);
 
 const openEditModal = async (user: User) => {
   selectedUser.value = { ...user };
-  await nextTick();
-  const modalElement = document.getElementById("editModal") as HTMLElement;
-  if (modalElement) {
-    const modal = new Modal(modalElement);
-    modal.show();
-  } else {
-    console.error("Modal element not found");
-  }
+  isEditModalOpen.value = true;
 };
 const OpenDeleteModal = async (user: User) => {
   selectedUser.value = { ...user };
-  await nextTick();
-  const modalElement = document.getElementById("deleteModal") as HTMLElement;
-  if (modalElement) {
-    const modal = new Modal(modalElement);
-    modal.show();
-  } else {
-    console.error("Modal element not found");
-  }
+  isDeleteModalOpen.value = true;
 };
 
 const emit = defineEmits<{
@@ -40,29 +28,21 @@ const emit = defineEmits<{
   (e: "delete-user", id: number): void;
 }>();
 
-function closeModal(newUserData: User) {
-  selectedUser.value = newUserData;
-  if (selectedUser.value) {
-    selectedUser.value = null;
-
-    const modalElement = document.getElementById("editModal") as HTMLElement;
-    const modal = Modal.getInstance(modalElement);
-    modal?.hide();
-  }
+function closeModal() {
+  selectedUser.value = null;
+  isEditModalOpen.value = false;
 }
 
 function saveChanges(newUserData: User) {
   selectedUser.value = newUserData;
   if (selectedUser.value) {
     emit("update-users", selectedUser.value);
-    closeModal(selectedUser.value);
+    closeModal();
   }
 }
 function deleteUser(id: number) {
   emit("delete-user", id);
-  const modalElement = document.getElementById("deleteModal") as HTMLElement;
-  const modal = Modal.getInstance(modalElement);
-  modal?.hide();
+  isDeleteModalOpen.value = false;
 }
 
 function sortByName(users: User[]) {
@@ -163,28 +143,28 @@ function sortByDate(users: User[]) {
 
   <ModalComponent
     v-if="selectedUser"
+    :isOpen="isEditModalOpen"
+    @close="closeModal"
+    @ok="saveChanges(selectedUser)"
     id="editModal"
-    @keyup.esc="closeModal(selectedUser)"
   >
     <template v-slot:title> Editing {{ selectedUser?.name }} </template>
-    <template v-slot:close-button>
-      <button
-        type="button"
-        class="btn-close"
-        @click="closeModal(selectedUser)"
-        aria-label="Close"
-      ></button>
-    </template>
+
     <template v-slot:body>
+      <!-- <RegistrationForm
+        :user="selectedUser"
+        :users="props.users"
+        @new-user="saveChanges"
+      /> -->
       <RegistrationForm
         :user="selectedUser"
-        :users="users"
+        :users="props.users"
         @new-user="saveChanges"
       >
         <template v-slot:footer="{ submitForm }">
           <div class="right-btn">
             <ButtonComponent
-              label="Save changes"
+              label="Save"
               :disabled="false"
               @click="submitForm"
             />
@@ -192,32 +172,28 @@ function sortByDate(users: User[]) {
         </template>
       </RegistrationForm>
     </template>
+
+    <template v-slot:actions="{ close }">
+      <ButtonComponent label="Close" :disabled="false" @click="close" />
+    </template>
   </ModalComponent>
-  <ModalComponent v-if="selectedUser" id="deleteModal">
-    <template v-slot:title> Delating {{ selectedUser?.name }} </template>
-    <template v-slot:close-button>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
-    </template>
+  <ModalComponent
+    v-if="selectedUser"
+    :isOpen="isDeleteModalOpen"
+    @close="isDeleteModalOpen = false"
+    @ok="() => selectedUser && deleteUser(selectedUser.id)"
+    id="deleteModal"
+  >
+    <template v-slot:title> Deleting {{ selectedUser?.name }} </template>
+
     <template v-slot:body>
-      Are you shure you want to delate {{ selectedUser?.name }},
-      {{ selectedUser?.email }}
+      Are you sure you want to delete {{ selectedUser?.name }},
+      {{ selectedUser?.email }}?
     </template>
-    <template v-slot:footer>
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-        Close
-      </button>
-      <button
-        type="button"
-        class="btn btn-danger"
-        @click="deleteUser(selectedUser.id)"
-      >
-        Delete
-      </button>
+
+    <template v-slot:actions="{ close, confirm }">
+      <button @click="close" class="btn btn-secondary">Close</button>
+      <button @click="confirm" class="btn btn-danger">Delete</button>
     </template>
   </ModalComponent>
 </template>
